@@ -1,0 +1,15 @@
+JITScratch is a framework for server-side Scratch.
+
+To compile a server to the file system, run a command in the format of..
+# node gencode PROJECT_ID > PROJECT_ID.js
+
+To run the NodeFront, do:
+# node NodeFront
+
+NodeFront runs on port 8088
+
+The protocol is in the form of arrays with / as delimiter.
+L/X/ -- loads the module onto the server project, X
+returns L/X/, X being the module number
+
+P/X/Y/Z1/Z2/Z3../ZN/ -- runs a procedure. X is the module number, Y is the procedure name, in the form of procedureN, N being procedure #, and the Z's being parameters
