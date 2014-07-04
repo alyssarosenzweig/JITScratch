@@ -143,10 +143,6 @@ function GetValueOf(line){	 // get value of is the main function in JITScratch, 
             return broadcast(line[1]);
         case "whenIReceive":
             return broadcastDef(line[1]);
-            
-        // cloud data related stuff
-        case "getUserName":
-            return getUsername();
     }
     return "Error 1000: Unresolved reference";
 }
