@@ -1,0 +1,14 @@
+{
+    "name" : "JITScratch",
+    "description" : "Compiler of procedure-based MIT Scratch projects to JavaScript",
+    "version" : "1.0.0",
+    "homepage" : "https://github.com/bobbybee/JITScratch",
+    "keywords" : ["scratch", "compiler", "server"],
+    "author" : "bobbybee <j104@rocketmail.com>",
+    "contributors" : [],
+    "dependencies" : [],
+    "repository" : {"type" : "git", "url" : "git://github.com/bobbybee/JITScratch"},
+    "main" : "JITScratch.js",
+    "bugs" : { "url" : "https://github.com/bobbybee/JITScratch/issues" },
+    "license" : "MIT"
+}
