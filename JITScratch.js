@@ -2,11 +2,9 @@
 JITScratch
 A compiler for text-based scratch
 Based on MATHOPS, Scratch-based expression generator
-Copyright (C) 2013 bobbybee
+Copyright (C) 2013-2014 bobbybee
 ALL RIGHTS RESERVERD
 */
-
-var http = require('http');
 
 // language config
 // these variables, if properly set can be used to compile into about any Turing-complete C-based languages
@@ -37,7 +35,7 @@ var VOID_RETURN = "function";
 // append lib: this is appended at the top of the output.
 // it is used to implement functions where a standard library version is not available
 // it can also be used to #include files  
-var append_lib = "__jit_cat=function(a,b){ return a + b; };__jit_len=function(a){return a.length};__jit_rand=function(a,b){return Math.floor(Math.random()*(b-a))+a};__jit_letterOf=function(a,b){return b[a];};var broadcastObj={};var cloudObj=null;module.exports.InitCloud=function(c){cloudObj=c;};";
+var append_lib = "__jit_cat=function(a,b){ return a + b; };__jit_len=function(a){return a.length};__jit_rand=function(a,b){return Math.floor(Math.random()*(b-a))+a};__jit_letterOf=function(a,b){return b[a];};";
 
 // procedural variables are used for keeping track of procedures
 // for processing reasons, procedures are stripped into a generic name like procedureXYZ, where XYZ is a procedureCount
@@ -46,41 +44,14 @@ var isProcedure = false;
 var procedureCount = 0;
 var procDefs = [];
 
-// general constants, not grouped in any particular way
-var CLOUD_SYMBOL = "☁";
-var CLOUD_SYMBOL_LEN = CLOUD_SYMBOL.length;
-var CLOUD_VAR_PREFIX = "cloudObj[\"";
-
-var USERNAME = "\"JITScratch\""; // this is more likely a function or a variable, but for now, it is simply the string "JITScratch"
-
 // green flag is removed from this list because it is current implemented as nothing, and the list is used for temrinating functions
 var HATLIST = ["procDef","whenIReceive", /*"whenGreenFlag"*/];
 
 var procScriptArr = [];
 
-
-var fs = require('fs');
-var projJSON = /*JSON.parse(fs.readFileSync(process.argv[2]+"/project.json").toString())*/ null;
+var projectJSON = null;
 
 var numRepeats = 0;
-
-http.request({host: 'scratch.mit.edu', path:"/internalapi/project/"+process.argv[2]+"/get/"}, function(res){
-	var txt = "";
-	res.on('data', function(c){
-		txt += c.toString();
-	});
-	res.on('end', function(){
-		projJSON = JSON.parse(txt);
-		console.log(append_lib);
-		console.log(GenerateDataDeclarations(projJSON.variables, projJSON.lists));
-		console.log(GenerateScriptsWithHat(projJSON.scripts, ["whenIRecieve", "procDef", "whenGreenFlag"]));
-	});
-}).end();
-
-//console.log(GenScriptCode(projJSON.scripts[process.argv[3]][2]));
-//console.log(append_lib); // the standard library gets printed
-//console.log(GenerateDataDeclarations(projJSON.variables, projJSON.lists));
-//console.log(GenerateScriptsWithHat(projJSON.scripts, ["whenIReceive", "procDef", "whenGreenFlag"]));
 
 function DoBlankProc(){ // effectively how you handle a blank value
 
@@ -239,14 +210,6 @@ function readVariable(t_var){
     _var = _var.replace(/@/g,"AT");
     _var = _var.replace(/\"/g, ""); // quotes are added on by GetValueOf, so this is essential as not to distort the data
     _var = _var.replace(/\?/g, "QMARK");
-    if(_var.indexOf(CLOUD_SYMBOL) != -1){
-        // this is a cloud var--we need to take special care
-        // by using a cloud prefix, we can either:
-            // A) remove lexical issues with Unicode var names
-            // or B) access a special cloud data function/object that uses getters and setters for network communication
-        // either way, it's useful
-        return CLOUD_VAR_PREFIX+_var.substring(CLOUD_SYMBOL_LEN, _var.length)+"\"]";
-    }
     return "module.exports."+_var;
 }
 
@@ -256,14 +219,6 @@ function readList(t_list){
     _list = _list.replace(/@/g,"AT");
     _list = _list.replace(/\"/g, ""); // quotes are added on by GetValueOf, so this is essential
     _list = _list.replace(/\?/g, "QMARK");
-    if(_list.indexOf(CLOUD_SYMBOL) != -1){
-        // this is a cloud list--we need to take special care
-        // by using a cloud prefix, we can either:
-            // A) remove lexical issues with Unicode var names
-            // or B) access a special cloud data function/object that uses getters and setters for network communication
-        // either way, it's useful
-        return CLOUD_VAR_PREFIX+_list.substring(CLOUD_SYMBOL_LEN, _list.length);
-    }
     return "module.exports."+_list;
 }
 
@@ -422,11 +377,6 @@ function getParam(val){
     return "__param_"+val;
 }
 
-// cloud data
-function getUsername(){
-    return USERNAME;
-}
-
 // lists
 function lineOfList(line, list){
     return readList(GetValueOf(list))+"["+GetValueOf(line)+"-1]";
@@ -533,8 +483,6 @@ function GenerateDataDeclarations(vars, lists){
     if(vars != null){
         i = 0;
         while(i < vars.length){
-          //  ret += TYPE_STRING+" "+readVariable(vars[i].name)+"="+GetValueOf(vars[i].value)+";";
-			// exporting here is used for node.js module export
 			if(vars[i].isPersistent){
 				++i;
 			} else {
@@ -547,9 +495,46 @@ function GenerateDataDeclarations(vars, lists){
         i = 0;
         while(i < lists.length){
             ret +=readList(lists[i].listName)+"="+JSON.stringify(lists[i++].contents)+";";
-		//	ret += readList(lists[i].listName)+"="+readList(lists[i++].listName)+";";
         }
     }
     
     return ret;
 }
+
+function JITScratch() {
+    this.projectLoaded = false;
+}
+
+JITScratch.prototype.fetchScratchProject = function(id, callback) {
+    require('http').request({host: 'projects.scratch.mit.edu', path:"/internalapi/project/"+id+"/get/"}, function(res){
+    	var txt = "";
+    	res.on('data', function(c){
+    		txt += c.toString();
+    	});
+    	res.on('end', function(){
+            rawProject(JSON.parse(txt));
+            callback();
+    	});
+    }).end();
+}
+
+JITScratch.prototype.rawProject = function(json) {
+    projectJSON = json;
+    this.projectLoaded = true;
+}
+
+JITScratch.prototype.generateSourceCode = function() {
+    var src = [  
+                append_lib, 
+                GenerateDataDeclarations(projJSON.variables, projJSON.lists), 
+                GenerateScriptsWithHat(projJSON.scripts, ["whenIRecieve", "procDef", "whenGreenFlag"])
+                ].join(";");
+    
+    return src;
+}
+
+JITScratch.prototype.getProcDefs = function() {
+    return procDefs;
+}
+
+module.exports = JITScratch;

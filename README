@@ -1,15 +1,39 @@
-JITScratch is a framework for server-side Scratch.
+JITScratch is a framework for compiling procedure-based Scratch projects to node.js-compatible JavaScript.
 
-To compile a server to the file system, run a command in the format of..
-# node gencode PROJECT_ID > PROJECT_ID.js
+It exposes a simple API simple install via npm:
 
-To run the NodeFront, do:
-# node NodeFront
+$ npm install jitscratch
 
-NodeFront runs on port 8088
+Once installed, it exposes a simple, CommonJS interface.
 
-The protocol is in the form of arrays with / as delimiter.
-L/X/ -- loads the module onto the server project, X
-returns L/X/, X being the module number
+### Hello, World ###
+```
+var JITScratch = require("JITScratch");
 
-P/X/Y/Z1/Z2/Z3../ZN/ -- runs a procedure. X is the module number, Y is the procedure name, in the form of procedureN, N being procedure #, and the Z's being parameters
+var helloWorld = new JITScratch();
+helloWorld.fetchScratchProject(10297480, function() {
+	console.log(helloWorld.generateSourceCode());
+});
+```
+
+### API ###
+
+require("JITScratch"): returns a JITScratch class
+
+JITScratch class:
+	
+	fetchScratchProject(id, callback)
+	
+	Fetches a Scratch project off the Scratch website where id is the project ID. callback has no parameters, and calls rawProject with the fetched JSON-representation of the project.
+	
+	rawProject(json)
+	
+	Loads the JSON project representation directly into JITScratch
+	
+	generateSourceCode()
+	
+	Returns JavaScript source code of the JSON project.
+	
+	getProcDefs()
+	
+	Returns an array of block specs used by the procedures, in the order of the procedure function calls in the source code.
