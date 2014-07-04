@@ -502,20 +502,22 @@ function JITScratch() {
 }
 
 JITScratch.prototype.fetchScratchProject = function(id, callback) {
+    var _this = this;
+    
     require('http').request({host: 'projects.scratch.mit.edu', path:"/internalapi/project/"+id+"/get/"}, function(res){
     	var txt = "";
     	res.on('data', function(c){
     		txt += c.toString();
     	});
     	res.on('end', function(){
-            rawProject(JSON.parse(txt));
+            _this.rawProject(JSON.parse(txt));
             callback();
     	});
     }).end();
 }
 
 JITScratch.prototype.rawProject = function(json) {
-    projectJSON = json;
+    projJSON = json;
     this.projectLoaded = true;
 }
 
