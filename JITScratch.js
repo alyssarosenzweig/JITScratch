@@ -19,6 +19,9 @@ var LETTEROF = "__jit_letterOf";
 var RAND_FUNC = "__jit_rand";
 var STRINGLEN_FUNC = "__jit_len";
 
+var RESET_TIMER_FUNC = "__jit_resetTimer";
+var GET_TIMER_FUNC = "__jit_getTimer";
+
 // for typeless languages, this is extremely easy to do.. all blank or vars
 var TYPE_NUMBER = "var";
 var TYPE_STRING = "var";
@@ -35,7 +38,16 @@ var VOID_RETURN = "function";
 // append lib: this is appended at the top of the output.
 // it is used to implement functions where a standard library version is not available
 // it can also be used to #include files  
-var append_lib = "__jit_cat=function(a,b){ return a + b; };__jit_len=function(a){return a.length};__jit_rand=function(a,b){return Math.floor(Math.random()*(b-a))+a};__jit_letterOf=function(a,b){return b[a];};broadcastObj={};";
+var append_lib =[ 
+                "__jit_cat=function(a,b){ return a + b; };",
+                "__jit_len=function(a){return a.length};",
+                "__jit_rand=function(a,b){return Math.floor(Math.random()*(b-a))+a};",
+                "__jit_letterOf=function(a,b){return b[a];};",
+                "__jit_resetTimer=function(){__jit_initTimer=(new Date).getTime()};",
+                "__jit_getTimer=function(){return ((new Date).getTime()-__jit_initTimer)/1000};",
+                "broadcastObj={};",
+                "__jit_resetTimer();"
+                ].join("");
 
 // procedural variables are used for keeping track of procedures
 // for processing reasons, procedures are stripped into a generic name like procedureXYZ, where XYZ is a procedureCount
@@ -143,6 +155,12 @@ function GetValueOf(line){	 // get value of is the main function in JITScratch, 
             return broadcast(line[1]);
         case "whenIReceive":
             return broadcastDef(line[1]);
+            
+        // timer
+        case "timer":
+            return timer();
+        case "timerReset":
+            return resetTimer();  
     }
     return "Error 1000: Unresolved reference";
 }
@@ -289,6 +307,14 @@ function greaterThan(op1, op2){
 
 function lessThan(op1, op2){
     return "("+GetValueOf(op1)+"<"+GetValueOf(op2)+")";
+}
+
+function timer(){
+    return GET_TIMER_FUNC+"()";
+}
+
+function resetTimer() {
+    return RESET_TIMER_FUNC+"()";
 }
 
 function defineProcedure(definitionClause, paramNames, defaultVal){	// define procedure is the definition hat block
