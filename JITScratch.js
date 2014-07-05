@@ -35,7 +35,7 @@ var VOID_RETURN = "function";
 // append lib: this is appended at the top of the output.
 // it is used to implement functions where a standard library version is not available
 // it can also be used to #include files  
-var append_lib = "__jit_cat=function(a,b){ return a + b; };__jit_len=function(a){return a.length};__jit_rand=function(a,b){return Math.floor(Math.random()*(b-a))+a};__jit_letterOf=function(a,b){return b[a];};";
+var append_lib = "__jit_cat=function(a,b){ return a + b; };__jit_len=function(a){return a.length};__jit_rand=function(a,b){return Math.floor(Math.random()*(b-a))+a};__jit_letterOf=function(a,b){return b[a];};broadcastObj={};";
 
 // procedural variables are used for keeping track of procedures
 // for processing reasons, procedures are stripped into a generic name like procedureXYZ, where XYZ is a procedureCount
@@ -421,7 +421,7 @@ function listContains(list, content){
 
 function broadcast(bcast){
     var bcastPtr = "broadcastObj["+GetValueOf(bcast)+"]";
-    return "if("+bcastPtr+"!==undefined){"+bcastPtr+".forEach(function(e,i,a){e();});}";
+    return "if("+bcastPtr+"!==undefined){"+bcastPtr+".forEach(function(e){e()})}";
 }
 
 function broadcastDef(bcast){
@@ -525,7 +525,7 @@ JITScratch.prototype.generateSourceCode = function() {
     var src = [  
                 append_lib, 
                 GenerateDataDeclarations(projJSON.variables, projJSON.lists), 
-                GenerateScriptsWithHat(projJSON.scripts, ["whenIRecieve", "procDef", "whenGreenFlag"])
+                GenerateScriptsWithHat(projJSON.scripts, ["whenIReceive", "procDef", "whenGreenFlag"])
                 ].join(";");
     
     return src;
