@@ -11,9 +11,21 @@ ALL RIGHTS RESERVERD
 // examples include: C, C++, C#, Objective-C, Objective-C++, D, F, F#, JavaScript, Java, ActionScript, etc.
 // in the current state, JITScratch outputs into JavaScript (node.js variant) 
 
-var SQRT_COMMAND = "Math.sqrt";
-var ROUND_FUNCTION = "Math.round";
+var ABS_COMMAND = "Math.abs";
+var FLOOR_COMMAND = "Math.floor";
 var CEILING_COMMAND = "Math.ceil";
+var SQRT_COMMAND = "Math.sqrt";
+var SIN_COMMAND = "Math.sin";
+var COS_COMMAND = "Math.cos";
+var TAN_COMMAND = "Math.tan";
+var ASIN_COMMAND = "Math.asin";
+var ACOS_COMMAND = "Math.acos";
+var ATAN_COMMAND = "Math.atan";
+var LN_COMMAND = "Math.ln";
+var LOG_COMMAND = "Math.log";
+var E_EXP_COMMAND = "__jit_e_exp";
+var TEN_EXP_COMMAND = "__jit_ten_exp";
+var ROUND_FUNCTION = "Math.round";
 var CAT_FUNCTION = "__jit_cat";
 var LETTEROF = "__jit_letterOf";
 var RAND_FUNC = "__jit_rand";
@@ -45,6 +57,8 @@ var append_lib =[
                 "__jit_letterOf=function(a,b){return b[a];};",
                 "__jit_resetTimer=function(){__jit_initTimer=(new Date).getTime()};",
                 "__jit_getTimer=function(){return ((new Date).getTime()-__jit_initTimer)/1000};",
+                "__jit_e_exp=function(a){return Math.pow(Math.E,a)};",
+                "__jit_ten_exp=function(a){return Math.pow(10,a);}",
                 "broadcastObj={};",
                 "__jit_resetTimer();"
                 ].join("");
@@ -178,12 +192,49 @@ function greenFlag(){
 function computeFunctionOf(_func, _op){
     var func = _func;
     switch(func){
-        case "sqrt":
-            func = SQRT_COMMAND;
+        case "abs":
+            func = ABS_COMMAND;
+            break;
+        case "floor":
+            func = FLOOR_COMMAND;
             break;
         case "ceiling":
             func = CEILING_COMMAND;
+            break;        
+        case "sqrt":
+            func = SQRT_COMMAND;
             break;
+        case "sin":
+            func = SIN_COMMAND;
+            break;
+        case "cos":
+            func = COS_COMMAND;
+            break;
+        case "tan":
+            func = TAN_COMMAND;
+            break;
+        case "asin":
+            func = ASIN_COMMAND;
+            break;
+        case "acos":
+            func = ACOS_COMMAND;
+            break;
+        case "atan":
+            func = ATAN_COMMAND;
+            break;
+        case "ln":
+            func = LN_COMMAND;
+            break;
+        case "log":
+            func = LOG_COMMAND;
+            break;
+        case "e ^":
+            func = E_EXP_COMMAND;
+            break;
+        case "10 ^":
+            func = TEN_EXP_COMMAND;
+            break;
+            
     }
     
     var op = GetValueOf(_op);
