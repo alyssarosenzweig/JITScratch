@@ -169,16 +169,6 @@ function GetValueOf(line){	 // get value of is the main function in JITScratch, 
             return broadcast(line[1]);
         case "whenIReceive":
             return broadcastDef(line[1]);
-            
-        // timer
-        case "timer":
-            return timer();
-        case "timerReset":
-            return resetTimer();  
-        case "timestamp":
-            return timestamp();
-        case "timeAndDate":
-            return timeAndDate(line[1]);
     }
     return "Error 1000: Unresolved reference";
 }
@@ -370,53 +360,6 @@ function timer(){
 
 function resetTimer() {
     return RESET_TIMER_FUNC+"()";
-}
-
-function timestamp(){
-    return TIMESTAMP_FUNC+"()";
-}
-
-function timeAndDate(current) {
-    var epochDiv = 1;
-    var epochMod = 0;
-    
-    switch(current) {
-        case "second": {
-            epochDiv = 1000;
-            epochMod = 60;
-        }
-        break;
-        case "minute": {
-            epochDiv = 60000;
-            epochMod = 60;
-        }
-        break;
-        case "hour": {
-            epochDiv = 3600000;
-            epochMod = 24;
-        }
-        break;          
-        case "day of week": {
-            epochDiv = 86400000;
-            epochMod = 7;
-        }
-        break; 
-        case "minute": {
-            epochDiv = 60000;
-            epochMod = 60;
-        }
-        break;
-        case "minute": {
-            epochDiv = 60000;
-            epochMod = 60;
-        }
-        break;          
-        case "minute": {
-            epochDiv = 60000;
-            epochMod = 60;
-        }
-        break;
-    }
 }
 
 function defineProcedure(definitionClause, paramNames, defaultVal){	// define procedure is the definition hat block
