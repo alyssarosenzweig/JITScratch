@@ -175,6 +175,10 @@ function GetValueOf(line){	 // get value of is the main function in JITScratch, 
             return timer();
         case "timerReset":
             return resetTimer();  
+        case "timestamp":
+            return timestamp();
+        case "timeAndDate":
+            return timeAndDate(line[1]);
     }
     return "Error 1000: Unresolved reference";
 }
@@ -366,6 +370,53 @@ function timer(){
 
 function resetTimer() {
     return RESET_TIMER_FUNC+"()";
+}
+
+function timestamp(){
+    return TIMESTAMP_FUNC+"()";
+}
+
+function timeAndDate(current) {
+    var epochDiv = 1;
+    var epochMod = 0;
+    
+    switch(current) {
+        case "second": {
+            epochDiv = 1000;
+            epochMod = 60;
+        }
+        break;
+        case "minute": {
+            epochDiv = 60000;
+            epochMod = 60;
+        }
+        break;
+        case "hour": {
+            epochDiv = 3600000;
+            epochMod = 24;
+        }
+        break;          
+        case "day of week": {
+            epochDiv = 86400000;
+            epochMod = 7;
+        }
+        break; 
+        case "minute": {
+            epochDiv = 60000;
+            epochMod = 60;
+        }
+        break;
+        case "minute": {
+            epochDiv = 60000;
+            epochMod = 60;
+        }
+        break;          
+        case "minute": {
+            epochDiv = 60000;
+            epochMod = 60;
+        }
+        break;
+    }
 }
 
 function defineProcedure(definitionClause, paramNames, defaultVal){	// define procedure is the definition hat block
@@ -601,10 +652,19 @@ JITScratch.prototype.rawProject = function(json) {
 JITScratch.prototype.generateSourceCode = function() {
     var src = [  
                 append_lib, 
-                GenerateDataDeclarations(projJSON.variables, projJSON.lists), 
-                GenerateScriptsWithHat(projJSON.scripts, ["whenIReceive", "procDef", "whenGreenFlag"])
-                ].join(";");
-    
+                GenerateDataDeclarations(projJSON.variables, projJSON.lists)
+				];
+	
+	if(projJSON.scripts) {
+		src.push(GenerateScriptsWithHat(projJSON.scripts, ["whenIReceive", "procDef", "whenGreenFlag"]));
+	}
+	
+	for(var i = 0; i < projJSON.children.length; ++i) {
+		if(projJSON.children[i].scripts) {
+			src.push(GenerateScriptsWithHat(projJSON.children[i].scripts, ["whenIReceive", "procDef", "whenGreenFlag"]));
+		}
+	}
+        
     return src;
 }
 
