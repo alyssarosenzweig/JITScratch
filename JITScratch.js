@@ -601,10 +601,19 @@ JITScratch.prototype.rawProject = function(json) {
 JITScratch.prototype.generateSourceCode = function() {
     var src = [  
                 append_lib, 
-                GenerateDataDeclarations(projJSON.variables, projJSON.lists), 
-                GenerateScriptsWithHat(projJSON.scripts, ["whenIReceive", "procDef", "whenGreenFlag"])
-                ].join(";");
-    
+                GenerateDataDeclarations(projJSON.variables, projJSON.lists)
+				];
+	
+	if(projJSON.scripts) {
+		src.push(GenerateScriptsWithHat(projJSON.scripts, ["whenIReceive", "procDef", "whenGreenFlag"]));
+	}
+	
+	for(var i = 0; i < projJSON.children.length; ++i) {
+		if(projJSON.children[i].scripts) {
+			src.push(GenerateScriptsWithHat(projJSON.children[i].scripts, ["whenIReceive", "procDef", "whenGreenFlag"]));
+		}
+	}
+        
     return src;
 }
 
