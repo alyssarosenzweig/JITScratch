@@ -169,6 +169,12 @@ function GetValueOf(line){	 // get value of is the main function in JITScratch, 
             return broadcast(line[1]);
         case "whenIReceive":
             return broadcastDef(line[1]);
+            
+        // timer
+        case "timer":
+            return timer();
+        case "timerReset":
+            return resetTimer();  
     }
     return "Error 1000: Unresolved reference";
 }
